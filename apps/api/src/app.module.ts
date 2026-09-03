@@ -2,6 +2,8 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { HealthController } from "./health.controller";
+import { UsersModule } from "./modules/users/users.module";
+import { AuthModule } from "./modules/auth/auth.module";
 
 @Module({
     imports: [
@@ -19,6 +21,8 @@ import { HealthController } from "./health.controller";
             // synchronize is convenient for local dev only — never in production.
             synchronize: process.env.NODE_ENV !== "production",
         }),
+        UsersModule,
+        AuthModule,
     ],
     controllers: [HealthController],
 })
