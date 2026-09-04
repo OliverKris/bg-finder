@@ -85,4 +85,25 @@ describe("Auth (e2e)", () => {
             })
             .expect(400);
     });
+
+    it("users/me (GET) rejects requests with no token", () => {
+        return request(app.getHttpServer()).get("/users/me").expect(401);
+    });
+
+    it("users/me (GET) returns the current user with a valid token", async () => {
+        const LoginRes = await request(app.getHttpServer())
+            .post("/auth/login")
+            .send({ email: testEmail, password: testPassword });
+
+        const token = LoginRes.body.accessToken;
+
+        return request(app.getHttpServer())
+            .get("/users/me")
+            .set("Authorization", `Bearer ${token}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.email).toBe(testEmail);
+                expect(res.body.passwordHash).toBeUndefined();
+            });
+    });
 });
