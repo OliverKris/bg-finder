@@ -1,0 +1,32 @@
+node_modules/
+dist/
+build/
+.next/
+out/
+
+# env files — never commit real secrets
+.env
+.env.*
+!.env.example
+
+*.log
+npm-debug.log*
+
+# terraform (note: .terraform.lock.hcl SHOULD be committed, like a package-lock file)
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+
+# editor/OS
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+.DS_Store
+
+# test/coverage
+coverage/
+
+# docker
+docker-compose.override.yml

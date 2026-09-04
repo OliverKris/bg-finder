@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: boardgame-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: boardgame
+    ports:
+      - "5432:5432"
+    volumes:
+      - boardgame-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Optional lightweight DB browser at http://localhost:8080
+  # (login: System=PostgreSQL, Server=postgres, User=postgres, Password=postgres, DB=boardgame)
+  adminer:
+    image: adminer:latest
+    container_name: boardgame-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  boardgame-postgres-data:
