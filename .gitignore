@@ -19,7 +19,9 @@ npm-debug.log*
 terraform.tfvars
 
 # editor/OS
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .idea/
 .DS_Store
 
