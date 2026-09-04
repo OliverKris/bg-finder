@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-      branches: [main]
+      branches: [main, dev]
     pull_request:
-      branches: [main]
+      branches: [main, dev]
 
 jobs:
   build:
@@ -15,6 +15,7 @@ jobs:
         with:
           node-version: 20
       - run: npm install
+      - run: npm run test --workspace=apps/api
       - run: npm run build:api
       - run: npm run build:web
       # Deploy step will be added once Terraform infra (Phase 1 wrap-up) is live.
