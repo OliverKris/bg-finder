@@ -1,7 +1,7 @@
 import {
-    ConflictException,
-    Injectable,
-    NotFoundException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
@@ -15,48 +15,57 @@ export type PublicUser = Omit<User, "passwordHash">;
 
 @Injectable()
 export class UsersService {
-    constructor(
-        @InjectRepository(User)
-        private readonly usersRepo: Repository<User>,
-    ) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepo: Repository<User>,
+  ) {}
 
-    async create(dto: CreateUserDto): Promise<PublicUser> {
-        const existing = await this.usersRepo.findOne({
-            where: { email: dto.email },
-        });
-        if (existing) {
-            throw new ConflictException("Email already in use");
-        }
-
-        const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
-
-        const user = this.usersRepo.create({
-            email: dto.email,
-            passwordHash,
-            name: dto.name,
-            bio: dto.bio,
-            favoriteGames: dto.favoriteGames ?? [],
-            location: dto.location,
-        });
-
-        const saved = await this.usersRepo.save(user);
-        return this.toPublicUser(saved);
+  async create(dto: CreateUserDto): Promise<PublicUser> {
+    const existing = await this.usersRepo.findOne({
+      where: { email: dto.email },
+    });
+    if (existing) {
+      throw new ConflictException("Email already in use");
     }
 
-    async findById(id: string): Promise<PublicUser> {
-        const user = await this.usersRepo.findOne({ where: { id } });
-        if (!user) throw new NotFoundException("User not found");
-        return this.toPublicUser(user);
-    }
+    const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
 
-    // Used by AuthService only — this is the one place the full entity
-    // (including passwordHash) is allowed to leave the repository.
-    async findByEmailWithPassword(email: string): Promise<User | null> {
-        return this.usersRepo.findOne({ where: { email } });
-    }
+    const user = this.usersRepo.create({
+      email: dto.email,
+      passwordHash,
+      name: dto.name,
+      bio: dto.bio,
+      favoriteGames: dto.favoriteGames ?? [],
+      location: dto.location,
+    });
 
-    private toPublicUser(user: User): PublicUser {
-        const { passwordHash, ...publicUser } = user;
-        return publicUser;
-    }
+    const saved = await this.usersRepo.save(user);
+    return this.toPublicUser(saved);
+  }
+
+  async findById(id: string): Promise<PublicUser> {
+    const user = await this.usersRepo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException("User not found");
+    return this.toPublicUser(user);
+  }
+
+  // Used internally by other modules (e.g. SessionsService) that need to
+  // attach a real User entity to a relation. Never expose this return
+  // value directly from an API response — it includes passwordHash.
+  async findEntityById(id: string): Promise<User> {
+    const user = await this.usersRepo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException("User not found");
+    return user;
+  }
+
+  // Used by AuthService only — this is the one place the full entity
+  // (including passwordHash) is allowed to leave the repository.
+  async findByEmailWithPassword(email: string): Promise<User | null> {
+    return this.usersRepo.findOne({ where: { email } });
+  }
+
+  private toPublicUser(user: User): PublicUser {
+    const { passwordHash, ...publicUser } = user;
+    return publicUser;
+  }
 }
